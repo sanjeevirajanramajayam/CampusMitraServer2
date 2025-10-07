@@ -5,7 +5,6 @@ import (
 	"bitresume/jobs"
 	"bitresume/routes"
 	"log"
-	"os"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -54,10 +53,7 @@ func main() {
 	c.Start()
 
 	// Get PORT (Railway provides this automatically)
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "6001" // Default for local run
-	}
+	port := "6001"
 
 	log.Println("Server starting on port:", port)
 	r.Run(":" + port)
