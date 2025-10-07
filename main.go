@@ -3,23 +3,31 @@ package main
 import (
 	"bitresume/config"
 	"bitresume/jobs"
-	// "bitresume/jobs"
 	"bitresume/routes"
-	"log"                                
+	"log"
+	"os"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/robfig/cron/v3"
 )
+
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file:", err)
+	// Try loading .env (optional)
+	if err := godotenv.Load(); err != nil {
+		log.Println("No .env file found, using environment variables from Railway...")
 	}
+
+	// Initialize configs
 	config.InitOAuth()
 	config.InitDB()
+
+	// Setup Gin
 	r := gin.Default()
 	r.Static("/uploads", "./uploads")
+
+	// CORS setup
 	corsConfig := cors.Config{
 		AllowOrigins:     []string{"https://student-smart-hub.web.app"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -28,13 +36,29 @@ func main() {
 		AllowCredentials: true,
 	}
 	r.Use(cors.New(corsConfig))
+
+	// Root route
+	r.GET("/", func(c *gin.Context) {
+		c.String(200, "Server is running...")
+	})
+
+	// Register routes
 	routes.RegisterRoutes(r)
+
+	// Cron job (runs daily at 11:55 PM)
 	c := cron.New(cron.WithSeconds())
 	_, errCron := c.AddFunc("0 55 23 * * *", jobs.CallDailyTasksForAllDates)
-	// Schedule the job to run every day at 11:50 pm(seconds minute hour dayOfMonth month dayOfWeek)		
 	if errCron != nil {
 		panic("Failed to schedule cron job: " + errCron.Error())
 	}
 	c.Start()
-	r.Run(":6001")
+
+	// Get PORT (Railway provides this automatically)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "6001" // Default for local run
+	}
+
+	log.Println("Server starting on port:", port)
+	r.Run(":" + port)
 }
