@@ -45,12 +45,12 @@ func main() {
 	routes.RegisterRoutes(r)
 
 	// Cron job (runs daily at 11:55 PM)
-	c := cron.New(cron.WithSeconds())
-	_, errCron := c.AddFunc("0 55 23 * * *", jobs.CallDailyTasksForAllDates)
-	if errCron != nil {
-		panic("Failed to schedule cron job: " + errCron.Error())
-	}
-	c.Start()
+	// c := cron.New(cron.WithSeconds())
+	// _, errCron := c.AddFunc("0 55 23 * * *", jobs.CallDailyTasksForAllDates)
+	// if errCron != nil {
+	// 	panic("Failed to schedule cron job: " + errCron.Error())
+	// }
+	// c.Start()
 
 	// Get PORT (Railway provides this automatically)
 	port := "6001"
